@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 760" font-family="'Segoe UI','Microsoft YaHei',sans-serif">
+  <style>
+    .panel{fill:#ffffff;stroke:#d8d2c7;stroke-width:1.5;}
+    .phead{fill:#ece7df;stroke:#d8d2c7;stroke-width:1.5;}
+    .ptitle{fill:#2d2a27;font-size:15px;font-weight:700;}
+    .box{fill:#ffffff;stroke:#3f6b78;stroke-width:1.5;rx:6;}
+    .bbox{fill:#e3ecee;stroke:#3f6b78;stroke-width:1.5;rx:6;}
+    .bmain{fill:#2d2a27;font-size:13px;font-weight:600;}
+    .bsub{fill:#5c5650;font-size:11px;}
+    .arrow{stroke:#3f6b78;stroke-width:1.8;fill:none;}
+    .acc{fill:#3f6b78;font-size:12.5px;font-weight:700;}
+    .note{fill:#a86a4c;font-size:11.5px;}
+    .mon{fill:#f4f1ea;stroke:#c9c2b6;stroke-width:1.2;rx:6;}
+    .ml{fill:#5c5650;font-size:10.5px;}
+    .mlh{fill:#2d2a27;font-size:11.5px;font-weight:700;}
+    .ttl{fill:#2d2a27;font-size:17px;font-weight:700;}
+    .role{fill:#5c5650;font-size:12px;}
+  </style>
+
+  <text x="380" y="30" text-anchor="middle" class="ttl">phosphor-sel-logger</text>
+  <text x="380" y="50" text-anchor="middle" class="role">SEL 生产者 · 把 BMC 事件转成 IPMI SEL 记录（最小仓库，1 个 .cpp + 若干内联 monitor 头文件）</text>
+
+  <!-- Panel A 业务流程 -->
+  <rect class="panel" x="20" y="64" width="720" height="312" rx="6"/>
+  <rect class="phead" x="20" y="64" width="720" height="32" rx="6"/>
+  <text x="34" y="86" class="ptitle">一、业务流程：一条事件如何变成 SEL 记录</text>
+
+  <rect class="box" x="90" y="104" width="580" height="38" rx="6"/>
+  <text x="110" y="126" class="bmain">D-Bus 信号：阈值告警 / watchdog 超时 / Host 报错</text>
+
+  <line class="arrow" x1="380" y1="142" x2="380" y2="156"/>
+  <polygon points="372,154 388,154 380,166" fill="#3f6b78"/>
+
+  <rect class="box" x="90" y="166" width="580" height="44" rx="6"/>
+  <text x="110" y="186" class="bmain">对应 monitor 回调（startXxxMonitor 返回 sdbusplus::match）</text>
+  <text x="110" y="203" class="bsub">解析参数 → 调 selAddSystemRecord()</text>
+
+  <line class="arrow" x1="380" y1="210" x2="380" y2="224"/>
+  <polygon points="372,222 388,222 380,234" fill="#3f6b78"/>
+
+  <rect class="box" x="90" y="234" width="580" height="44" rx="6"/>
+  <text x="110" y="254" class="bmain">getNewRecordId() 分配 record id（递增 + 删除空洞复用）</text>
+  <text x="110" y="271" class="bsub">SEL 满返回 0xFFFF（selInvalidRecID）</text>
+
+  <line class="arrow" x1="380" y1="278" x2="380" y2="292"/>
+  <polygon points="372,290 388,290 380,302" fill="#3f6b78"/>
+
+  <rect class="bbox" x="90" y="302" width="580" height="64" rx="6"/>
+  <text x="110" y="322" class="bmain">两种落地（编译期二选一）：</text>
+  <text x="110" y="342" class="bsub">· 关 SEL_LOGGER_SEND_TO_LOGGING_SERVICE → sd_journal_send 写字段</text>
+  <text x="110" y="360" class="bsub">  IPMI_SEL_RECORD_ID / RECORD_TYPE / DATA（用 journal 当数据库）</text>
+  <text x="110" y="377" class="bsub">· 开 → 调 xyz.openbmc_project.Logging.Create（走统一日志）</text>
+
+  <text x="700" y="200" text-anchor="end" class="note">标准 SEL 限制：</text>
+  <text x="700" y="216" text-anchor="end" class="note">事件数据最多 3 字节，</text>
+  <text x="700" y="232" text-anchor="end" class="note">OEM 最多 13 字节，</text>
+  <text x="700" y="248" text-anchor="end" class="note">超长抛 invalid_argument</text>
+  <text x="700" y="264" text-anchor="end" class="note">（IPMI 规范，非 bug）</text>
+
+  <!-- Panel B 体系结构 -->
+  <rect class="panel" x="20" y="388" width="720" height="170" rx="6"/>
+  <rect class="phead" x="20" y="388" width="720" height="32" rx="6"/>
+  <text x="34" y="410" class="ptitle">二、代码体系结构：main + 内联 monitor</text>
+
+  <rect class="mon" x="60" y="430" width="320" height="112" rx="6"/>
+  <text x="74" y="450" class="mlh">src/sel_logger.cpp:418（main）</text>
+  <text x="74" y="470" class="ml">· 注册 xyz.openbmc_project.Logging.IPMI.SEL</text>
+  <text x="74" y="488" class="ml">  IpmiSelAdd / IpmiSelAddOem / Clear</text>
+  <text x="74" y="506" class="ml">· 按编译开关启动各 monitor</text>
+  <text x="74" y="524" class="ml">· io.run() 事件循环</text>
+
+  <rect class="mon" x="400" y="430" width="320" height="112" rx="6"/>
+  <text x="414" y="450" class="mlh">include/*_event_monitor.hpp（内联）</text>
+  <text x="414" y="470" class="ml">· threshold_event_monitor（量程换算）</text>
+  <text x="414" y="488" class="ml">· threshold_alarm_event_monitor</text>
+  <text x="414" y="506" class="ml">· watchdog_event_monitor（发 Redfish）</text>
+  <text x="414" y="524" class="ml">· host_error / pulse_event_monitor</text>
+
+  <!-- Panel C 交互 -->
+  <rect class="panel" x="20" y="570" width="720" height="140" rx="6"/>
+  <rect class="phead" x="20" y="570" width="720" height="32" rx="6"/>
+  <text x="34" y="592" class="ptitle">三、对外 D-Bus 交互</text>
+
+  <text x="40" y="620" class="acc">消费（监听信号）：</text>
+  <text x="40" y="640" class="ml">· 传感器阈值告警 / watchdog 超时 / Host 报错（PropertiesChanged、Watchdog、State.Host 信号）</text>
+
+  <text x="40" y="664" class="acc">提供（被调）：</text>
+  <text x="40" y="684" class="ml">· xyz.openbmc_project.Logging.IPMI.SEL：IpmiSelAdd / IpmiSelAddOem / Clear / SELDelete</text>
+  <text x="40" y="704" class="ml">· 可选写出到 phosphor-logging（开 SEL_LOGGER_SEND_TO_LOGGING_SERVICE）</text>
+</svg>
