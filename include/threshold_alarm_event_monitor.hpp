@@ -13,6 +13,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 */
+/* // 版权所有 (c) 2021 Intel Corporation
+ * //
+ * // 本文件受 Apache License, Version 2.0（以下简称 "License"）许可；
+ * // 除非符合该 License，否则你不得使用本文件。
+ * // 你可以在以下地址获取该 License 的副本：
+ * //
+ * //      http://www.apache.org/licenses/LICENSE-2.0
+ * //
+ * // 除非适用法律要求或书面同意，否则软件
+ * // 均按 "AS IS"（原样）基础分发，
+ * // 不附带任何明示或暗示的保证或条件。
+ * // 有关该 License 下的具体权限和限制，
+ * // 请参阅该 License。 */
 
 #pragma once
 #include "threshold_event_monitor.hpp"
@@ -151,10 +164,12 @@ void generateEvent(std::string signalName,
         }
     }
     // Indicate that bytes 2 and 3 are threshold sensor trigger values
+    // 表示字节 2 和 3 是阈值传感器的触发值
     eventData[0] |= thresholdEventDataTriggerReadingByte2 |
                     thresholdEventDataTriggerReadingByte3;
 
     // Get the sensor reading to put in the event data
+    // 获取传感器读数，放入事件数据
     sdbusplus::message_t getSensorValue =
         conn->new_method_call(msg.get_sender(), msg.get_path(),
                               "org.freedesktop.DBus.Properties", "GetAll");
@@ -196,6 +211,7 @@ void generateEvent(std::string signalName,
     }
 
     // Get the threshold value to put in the event data
+    // 获取阈值，放入事件数据
     sdbusplus::message_t getThreshold =
         conn->new_method_call(msg.get_sender(), msg.get_path(),
                               "org.freedesktop.DBus.Properties", "Get");

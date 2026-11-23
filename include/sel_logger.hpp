@@ -13,6 +13,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 */
+/* // 版权所有 (c) 2018 Intel Corporation
+ * //
+ * // 本文件受 Apache License, Version 2.0（以下简称 "License"）许可；
+ * // 除非符合该 License，否则你不得使用本文件。
+ * // 你可以在以下地址获取该 License 的副本：
+ * //
+ * //      http://www.apache.org/licenses/LICENSE-2.0
+ * //
+ * // 除非适用法律要求或书面同意，否则软件
+ * // 均按 "AS IS"（原样）基础分发，
+ * // 不附带任何明示或暗示的保证或条件。
+ * // 有关该 License 下的具体权限和限制，
+ * // 请参阅该 License。 */
 
 #pragma once
 #include <systemd/sd-journal.h>
@@ -32,6 +45,8 @@ static constexpr const char* ipmiSelAddInterface =
 
 // ID string generated using journalctl to include in the MESSAGE_ID field for
 // SEL entries.  Helps with filtering SEL entries in the journal.
+// 用 journalctl 生成的 ID 字符串，用于放入 SEL 条目的 MESSAGE_ID 字段。
+// 便于在日志（journal）中过滤 SEL 条目。
 static constexpr const char* selMessageId = "b370836ccf2f4850ac5bee185b77893a";
 static constexpr int selPriority = 5; // notice
 static constexpr uint8_t selSystemType = 0x02;
@@ -73,6 +88,7 @@ uint16_t selAddSystemRecord(
     const uint16_t& genId, [[maybe_unused]] T&&... metadata)
 {
     // Only 3 bytes of SEL event data are allowed in a system record
+    // 系统记录（system record）中只允许 3 字节的 SEL 事件数据
     if (selData.size() > selEvtDataMaxSize)
     {
         throw std::invalid_argument("Event data too large");

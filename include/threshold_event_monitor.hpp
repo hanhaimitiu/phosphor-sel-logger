@@ -13,6 +13,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 */
+/* // 版权所有 (c) 2018 Intel Corporation
+ * //
+ * // 本文件受 Apache License, Version 2.0（以下简称 "License"）许可；
+ * // 除非符合该 License，否则你不得使用本文件。
+ * // 你可以在以下地址获取该 License 的副本：
+ * //
+ * //      http://www.apache.org/licenses/LICENSE-2.0
+ * //
+ * // 除非适用法律要求或书面同意，否则软件
+ * // 均按 "AS IS"（原样）基础分发，
+ * // 不附带任何明示或暗示的保证或条件。
+ * // 有关该 License 下的具体权限和限制，
+ * // 请参阅该 License。 */
 
 #pragma once
 #include <boost/container/flat_map.hpp>
@@ -43,12 +56,15 @@ inline static sdbusplus::match startThresholdAssertMonitor(
     auto thresholdAssertMatcherCallback = [conn](sdbusplus::message_t& msg) {
         // This static set of std::pair<path, event> tracks asserted events to
         // avoid duplicate logs or deasserts logged without an assert
+        // 这个静态的 std::pair<path, event> 集合用于跟踪已断言（assert）的事件，
+        // 以避免重复记录日志，或记录没有对应 assert 的 deassert
         static boost::container::flat_set<std::pair<std::string, std::string>>
             assertedEvents;
         std::vector<uint8_t> eventData(selEvtDataMaxSize,
                                        selEvtDataUnspecified);
 
         // Get the event type and assertion details from the message
+        // 从消息中获取事件类型和断言（assertion）详情
         std::string sensorName;
         std::string thresholdInterface;
         std::string event;
@@ -67,14 +83,17 @@ inline static sdbusplus::match startThresholdAssertMonitor(
         }
 
         // Check the asserted events to determine if we should log this event
+        // 检查已断言事件，确定是否应记录此事件
         std::pair<std::string, std::string> pathAndEvent(
             std::string(msg.get_path()), event);
         if (assert)
         {
             // For asserts, add the event to the set and only log it if it's new
+            // 对于 assert，将事件加入集合，仅当是新事件时才记录
             if (assertedEvents.insert(pathAndEvent).second == false)
             {
                 // event is already in the set
+                // 事件已在集合中
                 return;
             }
         }
@@ -82,15 +101,20 @@ inline static sdbusplus::match startThresholdAssertMonitor(
         {
             // For deasserts, remove the event and only log the deassert if it
             // was asserted
+            // 对于 deassert，移除该事件，仅当它
+            // 之前被断言（assert）过时才记录 deassert
             if (assertedEvents.erase(pathAndEvent) == 0)
             {
                 // asserted event was not in the set
+                // 被断言的事件不在集合中
                 return;
             }
         }
 
         // Set the IPMI threshold event type based on the event details from the
         // message
+        // 根据消息中的事件详情设置
+        // IPMI 阈值事件类型
         if (event == "CriticalAlarmLow")
         {
             eventData[0] =
@@ -112,10 +136,12 @@ inline static sdbusplus::match startThresholdAssertMonitor(
                 static_cast<uint8_t>(thresholdEventOffsets::upperCritGoingHigh);
         }
         // Indicate that bytes 2 and 3 are threshold sensor trigger values
+        // 表示字节 2 和 3 是阈值传感器的触发值
         eventData[0] |= thresholdEventDataTriggerReadingByte2 |
                         thresholdEventDataTriggerReadingByte3;
 
         // Get the sensor reading to put in the event data
+        // 获取传感器读数，放入事件数据
         sdbusplus::message_t getSensorValue =
             conn->new_method_call(msg.get_sender(), msg.get_path(),
                                   "org.freedesktop.DBus.Properties", "GetAll");
@@ -160,6 +186,9 @@ inline static sdbusplus::match startThresholdAssertMonitor(
         // Get the threshold value to put in the event data
         // Get the threshold parameter by removing the "Alarm" text from the
         // event string
+        // 获取阈值，放入事件数据
+        // 通过从事件字符串中去掉 "Alarm" 文本，
+        // 得到阈值参数
         std::string alarm("Alarm");
         if (std::string::size_type pos = event.find(alarm);
             pos != std::string::npos)

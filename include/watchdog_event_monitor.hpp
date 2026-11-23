@@ -13,6 +13,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 */
+/* // 版权所有 (c) 2018 Intel Corporation
+ * //
+ * // 本文件受 Apache License, Version 2.0（以下简称 "License"）许可；
+ * // 除非符合该 License，否则你不得使用本文件。
+ * // 你可以在以下地址获取该 License 的副本：
+ * //
+ * //      http://www.apache.org/licenses/LICENSE-2.0
+ * //
+ * // 除非适用法律要求或书面同意，否则软件
+ * // 均按 "AS IS"（原样）基础分发，
+ * // 不附带任何明示或暗示的保证或条件。
+ * // 有关该 License 下的具体权限和限制，
+ * // 请参阅该 License。 */
 
 #pragma once
 #include <boost/container/flat_map.hpp>
@@ -61,6 +74,7 @@ inline static void sendWatchdogEventLog(
     std::optional<std::string_view> expireAction = std::nullopt)
 {
     // SEL event data is three bytes where 0xFF means unspecified
+    // SEL 事件数据为三个字节，其中 0xFF 表示未指定
     std::vector<uint8_t> eventData(selEvtDataMaxSize, 0xFF);
 
     sdbusplus::message_t getWatchdogStatus =
@@ -188,6 +202,7 @@ inline static void sendWatchdogEventLog(
     }
 
     // get watchdog status properties
+    // 获取 watchdog 状态属性
     static bool wdt_nolog;
     sdbusplus::bus_t bus = sdbusplus::bus::new_default();
     uint8_t netFn = 0x06;
@@ -220,9 +235,11 @@ inline static void sendWatchdogEventLog(
     }
 
     // Set Watchdog Timer byte1[7]-1b=don't log
+    // 设置 Watchdog Timer 字节 1[7]-1b = 不记录日志
     if (!wdt_nolog)
     {
         // Construct a human-readable message of this event for the log
+        // 为日志构造此事件的可读消息
         std::string journalMsg(
             std::string(currentTimerUse) + std::string(direction) +
             "watchdog countdown " + std::to_string(watchdogInterval / 1000) +

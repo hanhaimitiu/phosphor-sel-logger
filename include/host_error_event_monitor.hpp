@@ -13,6 +13,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 */
+/* // 版权所有 (c) 2022 Intel Corporation
+ * //
+ * // 本文件受 Apache License, Version 2.0（以下简称 "License"）许可；
+ * // 除非符合该 License，否则你不得使用本文件。
+ * // 你可以在以下地址获取该 License 的副本：
+ * //
+ * //      http://www.apache.org/licenses/LICENSE-2.0
+ * //
+ * // 除非适用法律要求或书面同意，否则软件
+ * // 均按 "AS IS"（原样）基础分发，
+ * // 不附带任何明示或暗示的保证或条件。
+ * // 有关该 License 下的具体权限和限制，
+ * // 请参阅该 License。 */
 
 #pragma once
 #include <boost/container/flat_map.hpp>
@@ -52,6 +65,7 @@ void hostErrorEventMonitor(std::shared_ptr<sdbusplus::asio::connection> conn,
     }
     bool assert = std::get<bool>(findState->second);
     // Check if the log should be recorded.
+    // 检查是否应记录该日志。
     if (assert)
     {
         if (hostErrorEvents.insert(objectPath).second == false)
